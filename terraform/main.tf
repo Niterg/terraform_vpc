@@ -4,7 +4,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -18,7 +18,7 @@ resource "aws_subnet" "public" {
   cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -32,7 +32,7 @@ resource "aws_subnet" "private" {
   cidr_block              = var.private_subnet_cidr
   map_public_ip_on_launch = false
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -44,7 +44,7 @@ resource "aws_subnet" "private" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -56,7 +56,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -68,7 +68,7 @@ resource "aws_route_table" "private" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.vpc.id
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
@@ -102,14 +102,22 @@ resource "aws_security_group" "app_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  lifecycle {
-    ignore_changes = all
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-
   tags = {
     Name = "App-SG"
   }
+  lifecycle {
+    ignore_changes = [egress]
+  }
+
 }
+
 
 # EC2 Instance
 resource "aws_instance" "app_server" {
@@ -138,7 +146,7 @@ resource "aws_instance" "app_server" {
               systemctl start httpd
               EOF
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [tags]
   }
 
   tags = {
