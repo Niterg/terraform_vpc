@@ -1,4 +1,4 @@
-# Terraform_vpc
+# Terraform VPC
 
 - Creating VPC network within AWS that creates an AWS
 
